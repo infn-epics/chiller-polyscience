@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Polyscience Chiller OPI - Compatible with SMC HECR OPI structure-->
+<display version="2.0.0">
+  <name>Chiller-polyscience</name>
+  <macros>
+    <P>LEL:CHL:POLYSCI:01</P>
+  </macros>
+  <width>800</width>
+  <height>900</height>
+  <background_color>
+    <color red="240" green="240" blue="240">
+    </color>
+  </background_color>
+  <actions>
+  </actions>
+  <grid_step_x>6</grid_step_x>
+  <grid_step_y>6</grid_step_y>
+
+  <!-- TITLE -->
+  <widget type="label" version="2.0.0">
+    <name>Title</name>
+    <text>Polyscience Chiller</text>
+    <x>24</x>
+    <y>6</y>
+    <width>360</width>
+    <height>30</height>
+    <font>
+      <font family="Liberation Sans" style="BOLD" size="20.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="51" blue="102">
+      </color>
+    </foreground_color>
+  </widget>
+
+  <!-- Connection Info -->
+  <widget type="label" version="2.0.0">
+    <name>ConnectionLabel</name>
+    <text>scelimxa8001.int.eli-np.ro:4001</text>
+    <x>420</x>
+    <y>12</y>
+    <width>240</width>
+    <height>18</height>
+    <font>
+      <font family="Liberation Sans" style="ITALIC" size="12.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="100" green="100" blue="100">
+      </color>
+    </foreground_color>
+  </widget>
+
+  <!-- MAIN CONTROL GROUP -->
+  <widget type="group" version="3.0.0">
+    <name>CONTROL</name>
+    <x>24</x>
+    <y>48</y>
+    <width>360</width>
+    <height>180</height>
+    <style>1</style>
+    <transparent>false</transparent>
+    
+    <!-- Mode Control -->
+    <widget type="label" version="2.0.0">
+      <name>ModeLabel</name>
+      <text>Unit Control</text>
+      <x>12</x>
+      <y>24</y>
+      <width>120</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+    </widget>
+    
+    <widget type="combo" version="2.0.0">
+      <name>UnitControl</name>
+      <pv_name>$(P):CTR_SP</pv_name>
+      <x>180</x>
+      <y>18</y>
+      <width>120</width>
+      <height>30</height>
+      <tooltip>Start/Stop the chiller unit</tooltip>
+    </widget>
+
+    <!-- Temperature Setpoint -->
+    <widget type="label" version="2.0.0">
+      <name>SetTempLabel</name>
+      <text>Set Temperature</text>
+      <x>12</x>
+      <y>66</y>
+      <width>150</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+    </widget>
+    
+    <widget type="textentry" version="3.0.0">
+      <name>TempSetpoint</name>
+      <pv_name>$(P):TEMP_SETPT_SP</pv_name>
+      <x>180</x>
+      <y>66</y>
+      <width>90</width>
+      <height>24</height>
+      <format>1</format>
+      <precision>2</precision>
+      <horizontal_alignment>1</horizontal_alignment>
+      <tooltip>Temperature setpoint in °C</tooltip>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>SetTempUnit</name>
+      <text>°C</text>
+      <x>276</x>
+      <y>66</y>
+      <width>30</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+
+    <!-- Current Temperature -->
+    <widget type="label" version="2.0.0">
+      <name>CurTempLabel</name>
+      <text>Internal Temp</text>
+      <x>12</x>
+      <y>102</y>
+      <width>150</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>IntTemp</name>
+      <pv_name>$(P):INT_TEMP_RB</pv_name>
+      <x>180</x>
+      <y>102</y>
+      <width>90</width>
+      <height>24</height>
+      <format>1</format>
+      <precision>2</precision>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>CurTempUnit</name>
+      <text>°C</text>
+      <x>276</x>
+      <y>102</y>
+      <width>30</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+
+    <!-- Setpoint Readback -->
+    <widget type="label" version="2.0.0">
+      <name>SetptRBLabel</name>
+      <text>Setpoint RB</text>
+      <x>12</x>
+      <y>138</y>
+      <width>150</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>SetptRB</name>
+      <pv_name>$(P):TEMP_SETPT_RB</pv_name>
+      <x>180</x>
+      <y>138</y>
+      <width>90</width>
+      <height>24</height>
+      <format>1</format>
+      <precision>2</precision>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>SetptRBUnit</name>
+      <text>°C</text>
+      <x>276</x>
+      <y>138</y>
+      <width>30</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+  </widget>
+
+  <!-- STATUS GROUP -->
+  <widget type="group" version="3.0.0">
+    <name>STATUS</name>
+    <x>408</x>
+    <y>48</y>
+    <width>360</width>
+    <height>180</height>
+    <style>1</style>
+    <transparent>false</transparent>
+    
+    <!-- Run LED -->
+    <widget type="led" version="2.0.0">
+      <name>RunLED</name>
+      <pv_name>$(P):STATUS:RUN</pv_name>
+      <x>30</x>
+      <y>24</y>
+      <width>60</width>
+      <height>60</height>
+      <off_label>OFF</off_label>
+      <off_color>
+        <color red="60" green="100" blue="60">
+        </color>
+      </off_color>
+      <on_label>RUN</on_label>
+      <on_color>
+        <color red="0" green="255" blue="0">
+        </color>
+      </on_color>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>RunLabel</name>
+      <text>Run</text>
+      <x>42</x>
+      <y>90</y>
+      <width>36</width>
+      <height>18</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <!-- Warning LED -->
+    <widget type="led" version="2.0.0">
+      <name>WarnLED</name>
+      <pv_name>$(P):STATUS:WARN</pv_name>
+      <x>138</x>
+      <y>24</y>
+      <width>60</width>
+      <height>60</height>
+      <off_label>OFF</off_label>
+      <off_color>
+        <color red="100" green="100" blue="60">
+        </color>
+      </off_color>
+      <on_label>WARN</on_label>
+      <on_color>
+        <color red="255" green="255" blue="0">
+        </color>
+      </on_color>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>WarnLabel</name>
+      <text>Warning</text>
+      <x>138</x>
+      <y>90</y>
+      <width>60</width>
+      <height>18</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <!-- Alarm LED -->
+    <widget type="led" version="2.0.0">
+      <name>AlarmLED</name>
+      <pv_name>$(P):STATUS:ALARM</pv_name>
+      <x>246</x>
+      <y>24</y>
+      <width>60</width>
+      <height>60</height>
+      <off_label>OFF</off_label>
+      <off_color>
+        <color red="100" green="60" blue="60">
+        </color>
+      </off_color>
+      <on_label>ALARM</on_label>
+      <on_color>
+        <color red="255" green="0" blue="0">
+        </color>
+      </on_color>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>AlarmLabel</name>
+      <text>Alarm</text>
+      <x>258</x>
+      <y>90</y>
+      <width>42</width>
+      <height>18</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <!-- State Display -->
+    <widget type="label" version="2.0.0">
+      <name>StateLabel</name>
+      <text>State:</text>
+      <x>30</x>
+      <y>120</y>
+      <width>60</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>StateDisplay</name>
+      <pv_name>$(P):STATE_RB</pv_name>
+      <x>96</x>
+      <y>120</y>
+      <width>120</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <!-- Fault Code -->
+    <widget type="label" version="2.0.0">
+      <name>FaultLabel</name>
+      <text>Fault Code:</text>
+      <x>30</x>
+      <y>150</y>
+      <width>90</width>
+      <height>18</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>FaultCode</name>
+      <pv_name>$(P):FAULT_RB</pv_name>
+      <x>126</x>
+      <y>150</y>
+      <width>60</width>
+      <height>18</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+  </widget>
+
+  <!-- PROGRAM CONTROL GROUP -->
+  <widget type="group" version="3.0.0">
+    <name>PROGRAM</name>
+    <x>24</x>
+    <y>240</y>
+    <width>744</width>
+    <height>300</height>
+    <style>1</style>
+    <transparent>false</transparent>
+    
+    <widget type="label" version="2.0.0">
+      <name>ProgTitle</name>
+      <text>Program Control</text>
+      <x>12</x>
+      <y>6</y>
+      <width>180</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="BOLD" size="16.0">
+        </font>
+      </font>
+    </widget>
+
+    <!-- Program Number -->
+    <widget type="label" version="2.0.0">
+      <name>ProgNumLabel</name>
+      <text>Program #</text>
+      <x>12</x>
+      <y>42</y>
+      <width>90</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="spinner" version="2.0.0">
+      <name>ProgNumSP</name>
+      <pv_name>$(P):PROG_NUM_SP</pv_name>
+      <x>108</x>
+      <y>42</y>
+      <width>90</width>
+      <height>24</height>
+      <minimum>1.0</minimum>
+      <maximum>10.0</maximum>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>ProgNumRB</name>
+      <pv_name>$(P):PROG_NUM_RB</pv_name>
+      <x>204</x>
+      <y>42</y>
+      <width>60</width>
+      <height>24</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <!-- Program Steps -->
+    <widget type="label" version="2.0.0">
+      <name>ProgStepsLabel</name>
+      <text>Steps</text>
+      <x>12</x>
+      <y>78</y>
+      <width>90</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="spinner" version="2.0.0">
+      <name>ProgStepsSP</name>
+      <pv_name>$(P):PROG_STEPS_SP</pv_name>
+      <x>108</x>
+      <y>78</y>
+      <width>90</width>
+      <height>24</height>
+      <minimum>1.0</minimum>
+      <maximum>50.0</maximum>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>ProgStepsRB</name>
+      <pv_name>$(P):PROG_STEPS_RB</pv_name>
+      <x>204</x>
+      <y>78</y>
+      <width>60</width>
+      <height>24</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <!-- Program Loops -->
+    <widget type="label" version="2.0.0">
+      <name>ProgLoopsLabel</name>
+      <text>Loops</text>
+      <x>12</x>
+      <y>114</y>
+      <width>90</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="spinner" version="2.0.0">
+      <name>ProgLoopsSP</name>
+      <pv_name>$(P):PROG_LOOPS_SP</pv_name>
+      <x>108</x>
+      <y>114</y>
+      <width>90</width>
+      <height>24</height>
+      <minimum>1.0</minimum>
+      <maximum>99.0</maximum>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>ProgLoopsRB</name>
+      <pv_name>$(P):PROG_LOOPS_RB</pv_name>
+      <x>204</x>
+      <y>114</y>
+      <width>60</width>
+      <height>24</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <!-- Current Status -->
+    <widget type="label" version="2.0.0">
+      <name>CurLoopLabel</name>
+      <text>Current Loop</text>
+      <x>300</x>
+      <y>42</y>
+      <width>120</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>CurLoopRB</name>
+      <pv_name>$(P):PROG_CURLOOP_RB</pv_name>
+      <x>426</x>
+      <y>42</y>
+      <width>60</width>
+      <height>24</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <widget type="label" version="2.0.0">
+      <name>CurStepLabel</name>
+      <text>Current Step</text>
+      <x>300</x>
+      <y>78</y>
+      <width>120</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>CurStepRB</name>
+      <pv_name>$(P):PROG_CURSTEP_RB</pv_name>
+      <x>426</x>
+      <y>78</y>
+      <width>60</width>
+      <height>24</height>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <widget type="label" version="2.0.0">
+      <name>ElapsedLabel</name>
+      <text>Elapsed Time</text>
+      <x>300</x>
+      <y>114</y>
+      <width>120</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>ElapsedRB</name>
+      <pv_name>$(P):PROG_ELAPSED_RB</pv_name>
+      <x>426</x>
+      <y>114</y>
+      <width>90</width>
+      <height>24</height>
+      <format>1</format>
+      <precision>2</precision>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>ElapsedUnit</name>
+      <text>min</text>
+      <x>522</x>
+      <y>114</y>
+      <width>36</width>
+      <height>24</height>
+    </widget>
+
+    <!-- Program Status -->
+    <widget type="label" version="2.0.0">
+      <name>ProgStatusLabel</name>
+      <text>Program Status</text>
+      <x>540</x>
+      <y>42</y>
+      <width>120</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>ProgStatusRB</name>
+      <pv_name>$(P):PROG_STATUS_RB</pv_name>
+      <x>540</x>
+      <y>72</y>
+      <width>120</width>
+      <height>30</height>
+      <font>
+        <font family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+
+    <!-- Program Control Buttons -->
+    <widget type="label" version="2.0.0">
+      <name>ProgCtrlLabel</name>
+      <text>Program Actions</text>
+      <x>12</x>
+      <y>168</y>
+      <width>150</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+    </widget>
+
+    <widget type="combo" version="2.0.0">
+      <name>ProgRunPause</name>
+      <pv_name>$(P):PROG_RUN_SP</pv_name>
+      <x>12</x>
+      <y>198</y>
+      <width>120</width>
+      <height>30</height>
+      <tooltip>Run or Pause the program</tooltip>
+    </widget>
+
+    <widget type="action_button" version="3.0.0">
+      <name>ProgStopBtn</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P):PROG_STOP</pv_name>
+          <value>1</value>
+          <description>Stop Program</description>
+        </action>
+      </actions>
+      <x>150</x>
+      <y>198</y>
+      <width>100</width>
+      <height>30</height>
+      <text>STOP</text>
+      <background_color>
+        <color red="255" green="100" blue="100">
+        </color>
+      </background_color>
+      <tooltip>Stop the current program</tooltip>
+    </widget>
+
+    <widget type="action_button" version="3.0.0">
+      <name>ProgSkipBtn</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P):PROG_SKIP</pv_name>
+          <value>1</value>
+          <description>Skip Period</description>
+        </action>
+      </actions>
+      <x>268</x>
+      <y>198</y>
+      <width>100</width>
+      <height>30</height>
+      <text>SKIP</text>
+      <background_color>
+        <color red="255" green="200" blue="100">
+        </color>
+      </background_color>
+      <tooltip>Skip to next period</tooltip>
+    </widget>
+
+    <!-- Pump Control -->
+    <widget type="label" version="2.0.0">
+      <name>PumpLabel</name>
+      <text>Pump</text>
+      <x>12</x>
+      <y>252</y>
+      <width>60</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="combo" version="2.0.0">
+      <name>PumpCtrl</name>
+      <pv_name>$(P):PUMP_SP</pv_name>
+      <x>78</x>
+      <y>252</y>
+      <width>90</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="led" version="2.0.0">
+      <name>PumpLED</name>
+      <pv_name>$(P):PUMP_RB</pv_name>
+      <x>180</x>
+      <y>252</y>
+      <width>24</width>
+      <height>24</height>
+      <off_color>
+        <color red="60" green="60" blue="100">
+        </color>
+      </off_color>
+      <on_color>
+        <color red="0" green="200" blue="255">
+        </color>
+      </on_color>
+    </widget>
+  </widget>
+
+  <!-- DEVICE INFO -->
+  <widget type="group" version="3.0.0">
+    <name>INFO</name>
+    <x>24</x>
+    <y>552</y>
+    <width>744</width>
+    <height>60</height>
+    <style>1</style>
+    <transparent>false</transparent>
+    
+    <widget type="label" version="2.0.0">
+      <name>DevIDLabel</name>
+      <text>Device ID:</text>
+      <x>12</x>
+      <y>18</y>
+      <width>90</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>DevID</name>
+      <pv_name>$(P):ID_RB</pv_name>
+      <x>108</x>
+      <y>18</y>
+      <width>300</width>
+      <height>24</height>
+    </widget>
+
+    <widget type="label" version="2.0.0">
+      <name>PVPrefixLabel</name>
+      <text>PV Prefix:</text>
+      <x>432</x>
+      <y>18</y>
+      <width>90</width>
+      <height>24</height>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>PVPrefix</name>
+      <text>$(P)</text>
+      <x>522</x>
+      <y>18</y>
+      <width>200</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Mono" style="REGULAR" size="12.0">
+        </font>
+      </font>
+    </widget>
+  </widget>
+
+  <!-- EXTERNAL TEMP (if available) -->
+  <widget type="group" version="3.0.0">
+    <name>EXTERNAL</name>
+    <x>24</x>
+    <y>624</y>
+    <width>360</width>
+    <height>72</height>
+    <style>1</style>
+    <transparent>false</transparent>
+    
+    <widget type="label" version="2.0.0">
+      <name>ExtTempLabel</name>
+      <text>External Temperature</text>
+      <x>12</x>
+      <y>24</y>
+      <width>180</width>
+      <height>24</height>
+      <font>
+        <font family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>ExtTemp</name>
+      <pv_name>$(P):EXT_TEMP_RB</pv_name>
+      <x>198</x>
+      <y>24</y>
+      <width>90</width>
+      <height>24</height>
+      <format>1</format>
+      <precision>2</precision>
+      <horizontal_alignment>1</horizontal_alignment>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>ExtTempUnit</name>
+      <text>°C</text>
+      <x>294</x>
+      <y>24</y>
+      <width>30</width>
+      <height>24</height>
+    </widget>
+  </widget>
+
+</display>

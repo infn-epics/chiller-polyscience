@@ -1,0 +1,28 @@
+Communications Commands — Commands must be entered in the exact format shown. Do not
+send a [LF] (line feed) after the [CR] (character return). Be sure to follow character case exactly.
+A response followed by an exclamation point (!) indicates that a command was executed correctly. A
+question mark (?) indicates that the Controller could not execute the command (either because it
+was in an improper format or the values were outside the allowable range). A response must be
+received from the Controller before another command can be sent. All responses are terminated
+with a single [CR].
+
+
+PROGRAMMABLE-CONTROLLER-ONLY COMMANDS
+Command Name	Command String	Parameters	Return Message
+Set Program Number	SVx[CR]	x = program number (1–10)	![CR]
+Set Program Steps	Ssxx[CR]	xx = number of steps (1–50)	![CR]
+Set Program Last Loop Number	SKxx[CR]	xx = loop count (1–99)	![CR]
+Set Program Step Setpoint	SYn,xxx.xx[CR]	n = step number, xxx.xx = temperature	![CR]
+Set Program Step Period	SXn,xxx.xx[CR]	n = step number, xxx.xx = time in minutes/seconds	![CR]
+Set Program Run Status	SGi[CR]	i=1 (Run), i=0 (Pause)	![CR]
+Set Program Stop	SR[CR]	None	![CR]
+Set Program Skip Period	SJ[CR]	None	![CR]
+Get Program Number	RV[CR]	None	x[CR] (program number)
+Get Program Steps	Rs[CR]	None	x[CR] (step count)
+Get Program Loops	RK[CR]	None	xx[CR] (loop count)
+Get Program Loop Number	RI[CR]	None	xx[CR] (current loop)
+Get Program Setpoint Step	RYn[CR]	n = step number	xxx.xx[CR]
+Get Program Set Period	RXn[CR]	n = step number	xxx.xx[CR]
+Get Program Step Number	RC[CR]	None	xx[CR] (current step)
+Get Program Elapsed Step Time	RE[CR]	None	xxx.xx[CR]
+Get Program Status	RG[CR]	None	0[CR] (Stopped), 1[CR] (Running), 2[CR] (Paused)

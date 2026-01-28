@@ -1,0 +1,288 @@
+#
+# Project       : Polyscience Chiller Device Support
+# Description   : EPICS StreamDevice support for Polyscience Programmable Chiller
+# 
+# Database with PVs compatible with chillerSmcHecr for OPI reuse
+#
+
+#======================================================================
+# TEMPERATURE READINGS
+#======================================================================
+
+# Internal Temperature Reading
+record(ai, "$(P,undefined):INT_TEMP_RB") {
+    field(DESC, "Internal Temperature Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto read_int_temperature $(PORT)")
+    field(SCAN, "5 second")
+    field(EGU,  "°C")
+    field(PREC, "2")
+    field(HIHI, "40")
+    field(HIGH, "35")
+    field(LOW,  "10")
+    field(LOLO, "5")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+}
+
+# External Temperature Reading (if probe available)
+record(ai, "$(P,undefined):EXT_TEMP_RB") {
+    field(DESC, "External Temperature Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto read_ext_temperature $(PORT)")
+    field(SCAN, "5 second")
+    field(EGU,  "°C")
+    field(PREC, "2")
+}
+
+# Temperature Setpoint Readback
+record(ai, "$(P,undefined):TEMP_SETPT_RB") {
+    field(DESC, "Temperature Setpoint Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto read_setpoint $(PORT)")
+    field(SCAN, "10 second")
+    field(EGU,  "°C")
+    field(PREC, "2")
+}
+
+#======================================================================
+# TEMPERATURE SETPOINT CONTROL
+#======================================================================
+
+# Temperature Setpoint (output command)
+record(ao, "$(P,undefined):TEMP_SETPT_SP") {
+    field(DESC, "Temperature SetPoint")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_temperature $(PORT)")
+    field(EGU,  "°C")
+    field(PREC, "2")
+    field(DRVH, "50")
+    field(DRVL, "-10")
+    field(HOPR, "50")
+    field(LOPR, "-10")
+}
+
+#======================================================================
+# UNIT CONTROL (ON/OFF)
+#======================================================================
+
+# Unit On/Off Control (compatible with SMC CTR_SP)
+record(bo, "$(P,undefined):CTR_SP") {
+    field(DESC, "Unit On/Off Control")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_unit_onoff $(PORT)")
+    field(ZNAM, "Stop")
+    field(ONAM, "Run")
+    field(FLNK, "$(P,undefined):CTR_RB")
+}
+
+# Unit Status Readback
+record(bi, "$(P,undefined):CTR_RB") {
+    field(DESC, "Unit Status Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto read_unit_status $(PORT)")
+    field(SCAN, "5 second")
+    field(ZNAM, "Stop")
+    field(ONAM, "Run")
+}
+
+# Pump Control
+record(bo, "$(P,undefined):PUMP_SP") {
+    field(DESC, "Pump On/Off Control")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_pump $(PORT)")
+    field(ZNAM, "Off")
+    field(ONAM, "On")
+}
+
+# Pump Status Readback
+record(bi, "$(P,undefined):PUMP_RB") {
+    field(DESC, "Pump Status Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto read_pump $(PORT)")
+    field(SCAN, "5 second")
+    field(ZNAM, "Off")
+    field(ONAM, "On")
+}
+
+#======================================================================
+# STATUS FLAGS (compatible with SMC OPI)
+#======================================================================
+
+# Run Status (derived from unit status for SMC compatibility)
+record(calc, "$(P,undefined):STATUS:RUN") {
+    field(DESC, "Run Status")
+    field(INPA, "$(P,undefined):CTR_RB CP")
+    field(CALC, "A")
+    field(SCAN, "Passive")
+}
+
+# Fault Status
+record(ai, "$(P,undefined):FAULT_RB") {
+    field(DESC, "Fault Status Code")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto read_fault $(PORT)")
+    field(SCAN, "5 second")
+}
+
+# Alarm Status (derived from fault)
+record(calc, "$(P,undefined):STATUS:ALARM") {
+    field(DESC, "Alarm Status")
+    field(INPA, "$(P,undefined):FAULT_RB CP")
+    field(CALC, "A>0?1:0")
+    field(SCAN, "Passive")
+}
+
+# Warning Status (placeholder for SMC compatibility)
+record(calc, "$(P,undefined):STATUS:WARN") {
+    field(DESC, "Warning Status")
+    field(INPA, "$(P,undefined):FAULT_RB CP")
+    field(CALC, "0")
+    field(SCAN, "Passive")
+}
+
+#======================================================================
+# PROGRAM CONTROL
+#======================================================================
+
+# Program Number Select (1-10)
+record(longout, "$(P,undefined):PROG_NUM_SP") {
+    field(DESC, "Program Number Setpoint")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_program_number $(PORT)")
+    field(HOPR, "10")
+    field(LOPR, "1")
+    field(DRVH, "10")
+    field(DRVL, "1")
+}
+
+# Program Number Readback
+record(longin, "$(P,undefined):PROG_NUM_RB") {
+    field(DESC, "Program Number Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto get_program_number $(PORT)")
+    field(SCAN, "10 second")
+}
+
+# Program Steps Setting (1-50)
+record(longout, "$(P,undefined):PROG_STEPS_SP") {
+    field(DESC, "Program Steps Setpoint")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_program_steps $(PORT)")
+    field(HOPR, "50")
+    field(LOPR, "1")
+    field(DRVH, "50")
+    field(DRVL, "1")
+}
+
+# Program Steps Readback
+record(longin, "$(P,undefined):PROG_STEPS_RB") {
+    field(DESC, "Program Steps Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto get_program_steps $(PORT)")
+    field(SCAN, "10 second")
+}
+
+# Program Loops Setting (1-99)
+record(longout, "$(P,undefined):PROG_LOOPS_SP") {
+    field(DESC, "Program Loops Setpoint")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_program_loops $(PORT)")
+    field(HOPR, "99")
+    field(LOPR, "1")
+    field(DRVH, "99")
+    field(DRVL, "1")
+}
+
+# Program Loops Readback
+record(longin, "$(P,undefined):PROG_LOOPS_RB") {
+    field(DESC, "Program Loops Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto get_program_loops $(PORT)")
+    field(SCAN, "10 second")
+}
+
+# Current Loop Number Readback
+record(longin, "$(P,undefined):PROG_CURLOOP_RB") {
+    field(DESC, "Current Loop Number")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto get_current_loop $(PORT)")
+    field(SCAN, "5 second")
+}
+
+# Current Step Number Readback
+record(longin, "$(P,undefined):PROG_CURSTEP_RB") {
+    field(DESC, "Current Step Number")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto get_current_step $(PORT)")
+    field(SCAN, "5 second")
+}
+
+# Elapsed Step Time Readback
+record(ai, "$(P,undefined):PROG_ELAPSED_RB") {
+    field(DESC, "Elapsed Step Time")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto get_elapsed_time $(PORT)")
+    field(SCAN, "5 second")
+    field(EGU,  "min")
+    field(PREC, "2")
+}
+
+# Program Status (0=Stopped, 1=Running, 2=Paused)
+record(mbbi, "$(P,undefined):PROG_STATUS_RB") {
+    field(DESC, "Program Status")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto get_program_status $(PORT)")
+    field(SCAN, "5 second")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(ZRST, "Stopped")
+    field(ONST, "Running")
+    field(TWST, "Paused")
+}
+
+# Program Run/Pause Control
+record(mbbo, "$(P,undefined):PROG_RUN_SP") {
+    field(DESC, "Program Run/Pause")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_run_status $(PORT)")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(ZRST, "Pause")
+    field(ONST, "Run")
+}
+
+# Program Stop Command
+record(bo, "$(P,undefined):PROG_STOP") {
+    field(DESC, "Program Stop Command")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_program_stop $(PORT)")
+    field(HIGH, "0.1")
+    field(ZNAM, "Idle")
+    field(ONAM, "Stop")
+}
+
+# Program Skip Period Command
+record(bo, "$(P,undefined):PROG_SKIP") {
+    field(DESC, "Skip Current Period")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto set_skip_period $(PORT)")
+    field(HIGH, "0.1")
+    field(ZNAM, "Idle")
+    field(ONAM, "Skip")
+}
+
+#======================================================================
+# DEVICE IDENTIFICATION
+#======================================================================
+
+record(stringin, "$(P,undefined):ID_RB") {
+    field(DESC, "Device Model/ID")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto read_id $(PORT)")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+}

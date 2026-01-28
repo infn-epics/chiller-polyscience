@@ -1,0 +1,214 @@
+# Polyscience Programmable Chiller - StreamDevice Protocol
+# Based on Communications Commands documentation
+#
+# All commands are terminated with [CR]
+# Responses are terminated with [CR]
+# Response '!' indicates command executed, '?' indicates error
+
+ReplyTimeout = 3000;
+ReadTimeout = 2000;
+WriteTimeout = 1000;
+Terminator = CR;
+ExtraInput = Ignore;
+
+#----------------------------------------------------------------------
+# PROGRAM COMMANDS - Set operations
+#----------------------------------------------------------------------
+
+# Set Program Number (1-10)
+# Command: SVx[CR]  Response: ![CR]
+set_program_number {
+    out "SV%d";
+    in "!";
+}
+
+# Set Program Steps (1-50)
+# Command: Ssxx[CR]  Response: ![CR]
+set_program_steps {
+    out "Ss%02d";
+    in "!";
+}
+
+# Set Program Last Loop Number (1-99)
+# Command: SKxx[CR]  Response: ![CR]
+set_program_loops {
+    out "SK%02d";
+    in "!";
+}
+
+# Set Program Step Setpoint temperature
+# Command: SYn,xxx.xx[CR]  Response: ![CR]
+set_step_setpoint {
+    out "SY%d,%.2f";
+    in "!";
+}
+
+# Set Program Step Period (time in minutes)
+# Command: SXn,xxx.xx[CR]  Response: ![CR]
+set_step_period {
+    out "SX%d,%.2f";
+    in "!";
+}
+
+# Set Program Run Status (1=Run, 0=Pause)
+# Command: SGi[CR]  Response: ![CR]
+set_run_status {
+    out "SG%d";
+    in "!";
+}
+
+# Set Program Stop
+# Command: SR[CR]  Response: ![CR]
+set_program_stop {
+    out "SR";
+    in "!";
+}
+
+# Set Program Skip Period
+# Command: SJ[CR]  Response: ![CR]
+set_skip_period {
+    out "SJ";
+    in "!";
+}
+
+#----------------------------------------------------------------------
+# PROGRAM COMMANDS - Get/Read operations
+#----------------------------------------------------------------------
+
+# Get Program Number
+# Command: RV[CR]  Response: x[CR]
+get_program_number {
+    out "RV";
+    in "%d";
+}
+
+# Get Program Steps count
+# Command: Rs[CR]  Response: x[CR]
+get_program_steps {
+    out "Rs";
+    in "%d";
+}
+
+# Get Program Loops setting
+# Command: RK[CR]  Response: xx[CR]
+get_program_loops {
+    out "RK";
+    in "%d";
+}
+
+# Get current Program Loop Number
+# Command: RI[CR]  Response: xx[CR]
+get_current_loop {
+    out "RI";
+    in "%d";
+}
+
+# Get Program Setpoint for step n
+# Command: RYn[CR]  Response: xxx.xx[CR]
+get_step_setpoint {
+    out "RY%(\$1)d";
+    in "%f";
+}
+
+# Get Program Period for step n
+# Command: RXn[CR]  Response: xxx.xx[CR]
+get_step_period {
+    out "RX%(\$1)d";
+    in "%f";
+}
+
+# Get current Program Step Number
+# Command: RC[CR]  Response: xx[CR]
+get_current_step {
+    out "RC";
+    in "%d";
+}
+
+# Get Program Elapsed Step Time
+# Command: RE[CR]  Response: xxx.xx[CR]
+get_elapsed_time {
+    out "RE";
+    in "%f";
+}
+
+# Get Program Status (0=Stopped, 1=Running, 2=Paused)
+# Command: RG[CR]  Response: 0/1/2[CR]
+get_program_status {
+    out "RG";
+    in "%d";
+}
+
+#----------------------------------------------------------------------
+# BASIC OPERATION COMMANDS (common to all Polyscience chillers)
+# These may need to be verified against specific chiller model
+#----------------------------------------------------------------------
+
+# Set temperature setpoint
+# Command: SSxxx.xx[CR] or Sxxx.xx[CR]  Response: ![CR]
+set_temperature {
+    out "SS%.2f";
+    in "!";
+}
+
+# Read internal temperature
+# Command: RT[CR]  Response: xxx.xx[CR]
+read_int_temperature {
+    out "RT";
+    in "%f";
+}
+
+# Read setpoint temperature
+# Command: RS[CR]  Response: xxx.xx[CR]
+read_setpoint {
+    out "RS";
+    in "%f";
+}
+
+# Read external probe temperature (if available)
+# Command: RT2[CR]  Response: xxx.xx[CR]
+read_ext_temperature {
+    out "RT2";
+    in "%f";
+}
+
+# Set pump on/off (1=on, 0=off)
+# Command: Wxx[CR]  Response: ![CR]
+set_pump {
+    out "W%d";
+    in "!";
+}
+
+# Read pump status
+# Command: RW[CR]  Response: x[CR]
+read_pump {
+    out "RW";
+    in "%d";
+}
+
+# Set unit on/off (1=on, 0=off)
+# Command: Ox[CR]  Response: ![CR]
+set_unit_onoff {
+    out "O%d";
+    in "!";
+}
+
+# Read unit on/off status
+# Command: RO[CR]  Response: x[CR]
+read_unit_status {
+    out "RO";
+    in "%d";
+}
+
+# Read fault status (if available)
+# Command: RF[CR]  Response: xx[CR]
+read_fault {
+    out "RF";
+    in "%d";
+}
+
+# Read model/version info
+# Command: ID[CR]  Response: model_string[CR]
+read_id {
+    out "ID";
+    in "%s";
+}

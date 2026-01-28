@@ -1,0 +1,201 @@
+#
+# Polyscience Chiller - SMC Compatibility Layer
+# 
+# Aliases and computed records to ensure compatibility with SMC HECR OPIs
+#
+
+# Alias for temperature readback (SMC uses INT_TEMP_RB -> TEMP_RB)
+alias("$(P):INT_TEMP_RB","$(P):TEMP_RB")
+
+# Alias for temperature setpoint (SMC uses TEMP_SETPT_SP -> TEMP_SP)
+alias("$(P):TEMP_SETPT_SP","$(P):TEMP_SP")
+
+# Alias for control setpoint (SMC uses CTR_SP -> STATE_SP)
+alias("$(P):CTR_SP","$(P):STATE_SP")
+
+#----------------------------------------------------------------------
+# STATE CALCULATION (compatible with SMC unicool-smc.db)
+# State: 0=OFF, 1=RUN, 2=WARNING, 3=ALARM
+#----------------------------------------------------------------------
+
+record(calcout, "$(P,undefined):calcstate") {
+    field(DESC, "State 0=OFF,1=RUN,2=WARNING,3=ALARM")
+    field(SCAN, "1 second")
+    field(INPA, "$(P,undefined):CTR_RB")         # RUN status (0/1)
+    field(INPB, "$(P,undefined):STATUS:ALARM")   # ALARM status
+    field(INPC, "$(P,undefined):STATUS:WARN")    # WARNING status
+    field(CALC, "B=1?3:(C=1?2:(A=1?1:0))")
+    field(OUT,  "$(P,undefined):STATE_RB PP")
+    field(FLNK, "$(P,undefined):STATE_RB")
+}
+
+record(mbbi, "$(P,undefined):STATE_RB") {
+    field(DESC, "Decoded:0=OFF,1=RUN,2=WARNING,3=ALARM")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "OFF")
+    field(ONST, "RUN")
+    field(TWST, "WARNING")
+    field(THST, "ALARM")
+    field(ZRSV, "NO_ALARM")
+    field(ONSV, "NO_ALARM")
+    field(TWSV, "MINOR")
+    field(THSV, "MAJOR")
+}
+
+#----------------------------------------------------------------------
+# STATUS REGISTER SIMULATION (for byte_monitor compatibility in OPI)
+# These records simulate the status/alarm bit fields from SMC
+#----------------------------------------------------------------------
+
+# STATUS_RB - Simulated status register (bit0=run, bit1=alarm, bit2=warn)
+record(calc, "$(P,undefined):STATUS_RB") {
+    field(DESC, "Status Register (simulated)")
+    field(SCAN, "2 second")
+    field(INPA, "$(P,undefined):CTR_RB")
+    field(INPB, "$(P,undefined):STATUS:ALARM")
+    field(INPC, "$(P,undefined):STATUS:WARN")
+    field(CALC, "A + (B<<1) + (C<<2)")
+}
+
+# ALARM1_RB - Simulated first alarm register (for OPI compatibility)
+# Bit mapping based on fault code (simplified)
+record(calc, "$(P,undefined):ALARM1_RB") {
+    field(DESC, "Alarm Register 1 (simulated)")
+    field(SCAN, "2 second")
+    field(INPA, "$(P,undefined):FAULT_RB")
+    field(CALC, "A>0 ? (1<<(A-1)) : 0")
+}
+
+# ALARM2_RB - Simulated second alarm register
+record(calc, "$(P,undefined):ALARM2_RB") {
+    field(DESC, "Alarm Register 2 (simulated)")
+    field(SCAN, "2 second")
+    field(INPA, "$(P,undefined):FAULT_RB")
+    field(CALC, "A>16 ? (1<<(A-17)) : 0")
+}
+
+#----------------------------------------------------------------------
+# OUTPUT RATIO SIMULATION (Polyscience may not have this)
+#----------------------------------------------------------------------
+
+record(calc, "$(P,undefined):OUTPUT_RATIO_RB") {
+    field(DESC, "Output Ratio (simulated)")
+    field(SCAN, "5 second")
+    field(INPA, "$(P,undefined):CTR_RB")
+    field(CALC, "A=1 ? 100 : 0")
+    field(EGU,  "%")
+    field(PREC, "0")
+}
+
+#----------------------------------------------------------------------
+# PLACEHOLDER ALARMS (for SMC OPI compatibility)
+# These provide .DESC fields that the OPI reads
+#----------------------------------------------------------------------
+
+record(bi, "$(P,undefined):ALARM:SYS_ERR_1") {
+    field(DESC, "System error 1")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:SYS_ERR_2") {
+    field(DESC, "System error 2")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:BACKUP_DATA_ERR") {
+    field(DESC, "Back-up data error")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:DC_PS_FAIL") {
+    field(DESC, "DC power supply failure")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:ILK_TEMP_HLIM") {
+    field(DESC, "High temperature failure")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:ILK_TEMP_LLIM") {
+    field(DESC, "Low temperature failure")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:THERMOSTAT_FAIL") {
+    field(DESC, "Thermostat alarm")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:ABNORMAL_OUT") {
+    field(DESC, "Abnormal output alarm")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:ILK_FLOW_LLIM") {
+    field(DESC, "Low flow rate alarm")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:TEMP_PROBE_FAIL") {
+    field(DESC, "Temp sensor disconnection")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:EXT_TEMP_PROBE_FAIL") {
+    field(DESC, "Ext temp sensor disconnection")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:ABNORMAL_AUTO_TUNING") {
+    field(DESC, "Abnormal auto tuning")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:ILK_FLUID_LVL_LLIM") {
+    field(DESC, "Low fluid level alarm")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:WARN_TEMP_HLIM") {
+    field(DESC, "Temperature upper limit")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
+
+record(bi, "$(P,undefined):ALARM:WARN_TEMP_LLIM") {
+    field(DESC, "Temperature lower limit")
+    field(INP,  "0")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+}
