@@ -1,288 +1,457 @@
 #
 # Project       : Polyscience Chiller Device Support
-# Description   : EPICS StreamDevice support for Polyscience Programmable Chiller
-# 
-# Database with PVs compatible with chillerSmcHecr for OPI reuse
+# Description   : EPICS device support for Polyscience Chiller
+# Compatible with SMC HECR Chiller database structure for OPI reuse
+#
+# Author        : ELI-NP
+# Created       : 2026-01-28
 #
 
-#======================================================================
-# TEMPERATURE READINGS
-#======================================================================
+# Aliases to match chillerSmc structure
+alias("$(P):INT_TEMP_RB","$(P):TEMP_RB")
+alias("$(P):TEMP_SETPT_SP","$(P):TEMP_SP")
+alias("$(P):CTR_SP","$(P):STATE_SP")
 
-# Internal Temperature Reading
-record(ai, "$(P,undefined):INT_TEMP_RB") {
-    field(DESC, "Internal Temperature Readback")
+#----------------------------------------------------------------------
+# DEVICE INFORMATION
+#----------------------------------------------------------------------
+
+# Firmware Revision - read at startup
+record(stringin, "$(P):FIRMWARE_RB") {
+    field(DESC, "Firmware Revision")
     field(DTYP, "stream")
-    field(INP,  "@polyscience.proto read_int_temperature $(PORT)")
-    field(SCAN, "5 second")
+    field(INP,  "@polyscience.proto getFirmwareRevision $(PORT)")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+}
+
+# Temperature Units (C or F) - read at startup
+record(stringin, "$(P):TEMP_UNITS_RB") {
+    field(DESC, "Temperature Units")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto getTempUnits $(PORT)")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+}
+
+# Device Model/Name (static info record)
+record(stringin, "$(P):MODEL_RB") {
+    field(DESC, "Device Model")
+    field(VAL,  "Polyscience")
+    field(PINI, "YES")
+}
+
+#----------------------------------------------------------------------
+# TEMPERATURE READINGS
+#----------------------------------------------------------------------
+
+# Internal Temperature (Primary temperature reading)
+record(ai, "$(P):INT_TEMP_RB") {
+    field(DESC, "Internal Temperature")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto getInternalTemp $(PORT)")
+    field(SCAN, "2 second")
     field(EGU,  "°C")
     field(PREC, "2")
-    field(HIHI, "40")
-    field(HIGH, "35")
-    field(LOW,  "10")
-    field(LOLO, "5")
+    field(HOPR, "100")
+    field(LOPR, "-50")
+    field(HIHI, "50")
+    field(HIGH, "40")
+    field(LOW,  "-10")
+    field(LOLO, "-20")
     field(HHSV, "MAJOR")
     field(HSV,  "MINOR")
     field(LSV,  "MINOR")
     field(LLSV, "MAJOR")
 }
 
-# External Temperature Reading (if probe available)
-record(ai, "$(P,undefined):EXT_TEMP_RB") {
-    field(DESC, "External Temperature Readback")
+# External Temperature (if external probe is used)
+record(ai, "$(P):EXT_TEMP_RB") {
+    field(DESC, "External Temperature")
     field(DTYP, "stream")
-    field(INP,  "@polyscience.proto read_ext_temperature $(PORT)")
-    field(SCAN, "5 second")
+    field(INP,  "@polyscience.proto getExternalTemp $(PORT)")
+    field(SCAN, "2 second")
     field(EGU,  "°C")
     field(PREC, "2")
+    field(HOPR, "100")
+    field(LOPR, "-50")
+    field(HIHI, "50")
+    field(HIGH, "40")
+    field(LOW,  "-10")
+    field(LOLO, "-20")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
 }
+
+#----------------------------------------------------------------------
+# TEMPERATURE SETPOINT
+#----------------------------------------------------------------------
 
 # Temperature Setpoint Readback
-record(ai, "$(P,undefined):TEMP_SETPT_RB") {
+record(ai, "$(P):TEMP_SETPT_RB") {
     field(DESC, "Temperature Setpoint Readback")
     field(DTYP, "stream")
-    field(INP,  "@polyscience.proto read_setpoint $(PORT)")
-    field(SCAN, "10 second")
+    field(INP,  "@polyscience.proto getSetpoint $(PORT)")
+    field(SCAN, "5 second")
     field(EGU,  "°C")
     field(PREC, "2")
+    field(HOPR, "100")
+    field(LOPR, "-50")
 }
 
-#======================================================================
-# TEMPERATURE SETPOINT CONTROL
-#======================================================================
-
-# Temperature Setpoint (output command)
-record(ao, "$(P,undefined):TEMP_SETPT_SP") {
-    field(DESC, "Temperature SetPoint")
+# Temperature Setpoint Control
+record(ao, "$(P):TEMP_SETPT_SP") {
+    field(DESC, "Temperature Setpoint")
     field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_temperature $(PORT)")
+    field(OUT,  "@polyscience.proto setSetpoint $(PORT)")
     field(EGU,  "°C")
     field(PREC, "2")
-    field(DRVH, "50")
-    field(DRVL, "-10")
-    field(HOPR, "50")
-    field(LOPR, "-10")
+    field(DRVH, "100")
+    field(DRVL, "-50")
+    field(HOPR, "100")
+    field(LOPR, "-50")
+    field(FLNK, "$(P):TEMP_SETPT_RB")
 }
 
-#======================================================================
-# UNIT CONTROL (ON/OFF)
-#======================================================================
+#----------------------------------------------------------------------
+# OPERATION STATUS AND CONTROL
+#----------------------------------------------------------------------
 
-# Unit On/Off Control (compatible with SMC CTR_SP)
-record(bo, "$(P,undefined):CTR_SP") {
-    field(DESC, "Unit On/Off Control")
+# Operation Status Readback (0=Off, 1=Running)
+record(bi, "$(P):OPERATION_STATUS_RB") {
+    field(DESC, "Operation Status")
     field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_unit_onoff $(PORT)")
-    field(ZNAM, "Stop")
-    field(ONAM, "Run")
-    field(FLNK, "$(P,undefined):CTR_RB")
+    field(INP,  "@polyscience.proto getOperationStatus $(PORT)")
+    field(SCAN, "2 second")
+    field(ZNAM, "Standby")
+    field(ONAM, "Running")
+    field(ZSV,  "MINOR")
+    field(OSV,  "NO_ALARM")
+    field(FLNK, "$(P):calcstate")
 }
 
-# Unit Status Readback
-record(bi, "$(P,undefined):CTR_RB") {
-    field(DESC, "Unit Status Readback")
+# On/Off Control (0=Off, 1=On)
+record(bo, "$(P):CTR_SP") {
+    field(DESC, "Chiller On/Off Control")
     field(DTYP, "stream")
-    field(INP,  "@polyscience.proto read_unit_status $(PORT)")
-    field(SCAN, "5 second")
-    field(ZNAM, "Stop")
-    field(ONAM, "Run")
-}
-
-# Pump Control
-record(bo, "$(P,undefined):PUMP_SP") {
-    field(DESC, "Pump On/Off Control")
-    field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_pump $(PORT)")
+    field(OUT,  "@polyscience.proto setOnOff $(PORT)")
     field(ZNAM, "Off")
     field(ONAM, "On")
+    field(FLNK, "$(P):OPERATION_STATUS_RB")
 }
 
-# Pump Status Readback
-record(bi, "$(P,undefined):PUMP_RB") {
-    field(DESC, "Pump Status Readback")
-    field(DTYP, "stream")
-    field(INP,  "@polyscience.proto read_pump $(PORT)")
-    field(SCAN, "5 second")
-    field(ZNAM, "Off")
-    field(ONAM, "On")
-}
+#----------------------------------------------------------------------
+# ALARM STATUS
+#----------------------------------------------------------------------
 
-#======================================================================
-# STATUS FLAGS (compatible with SMC OPI)
-#======================================================================
-
-# Run Status (derived from unit status for SMC compatibility)
-record(calc, "$(P,undefined):STATUS:RUN") {
-    field(DESC, "Run Status")
-    field(INPA, "$(P,undefined):CTR_RB CP")
-    field(CALC, "A")
-    field(SCAN, "Passive")
-}
-
-# Fault Status
-record(ai, "$(P,undefined):FAULT_RB") {
-    field(DESC, "Fault Status Code")
-    field(DTYP, "stream")
-    field(INP,  "@polyscience.proto read_fault $(PORT)")
-    field(SCAN, "5 second")
-}
-
-# Alarm Status (derived from fault)
-record(calc, "$(P,undefined):STATUS:ALARM") {
+# Alarm Status (0=No alarm, 1=Alarm)
+record(bi, "$(P):ALARM_STATUS_RB") {
     field(DESC, "Alarm Status")
-    field(INPA, "$(P,undefined):FAULT_RB CP")
-    field(CALC, "A>0?1:0")
-    field(SCAN, "Passive")
-}
-
-# Warning Status (placeholder for SMC compatibility)
-record(calc, "$(P,undefined):STATUS:WARN") {
-    field(DESC, "Warning Status")
-    field(INPA, "$(P,undefined):FAULT_RB CP")
-    field(CALC, "0")
-    field(SCAN, "Passive")
-}
-
-#======================================================================
-# PROGRAM CONTROL
-#======================================================================
-
-# Program Number Select (1-10)
-record(longout, "$(P,undefined):PROG_NUM_SP") {
-    field(DESC, "Program Number Setpoint")
     field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_program_number $(PORT)")
-    field(HOPR, "10")
-    field(LOPR, "1")
-    field(DRVH, "10")
-    field(DRVL, "1")
+    field(INP,  "@polyscience.proto getAlarmStatus $(PORT)")
+    field(SCAN, "2 second")
+    field(ZNAM, "No Alarm")
+    field(ONAM, "Alarm")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MAJOR")
 }
 
-# Program Number Readback
-record(longin, "$(P,undefined):PROG_NUM_RB") {
-    field(DESC, "Program Number Readback")
+# High Temperature Alarm Readback
+record(ai, "$(P):HIGH_ALARM_RB") {
+    field(DESC, "High Temp Alarm Readback")
     field(DTYP, "stream")
-    field(INP,  "@polyscience.proto get_program_number $(PORT)")
+    field(INP,  "@polyscience.proto getHighAlarm $(PORT)")
     field(SCAN, "10 second")
-}
-
-# Program Steps Setting (1-50)
-record(longout, "$(P,undefined):PROG_STEPS_SP") {
-    field(DESC, "Program Steps Setpoint")
-    field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_program_steps $(PORT)")
-    field(HOPR, "50")
-    field(LOPR, "1")
-    field(DRVH, "50")
-    field(DRVL, "1")
-}
-
-# Program Steps Readback
-record(longin, "$(P,undefined):PROG_STEPS_RB") {
-    field(DESC, "Program Steps Readback")
-    field(DTYP, "stream")
-    field(INP,  "@polyscience.proto get_program_steps $(PORT)")
-    field(SCAN, "10 second")
-}
-
-# Program Loops Setting (1-99)
-record(longout, "$(P,undefined):PROG_LOOPS_SP") {
-    field(DESC, "Program Loops Setpoint")
-    field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_program_loops $(PORT)")
-    field(HOPR, "99")
-    field(LOPR, "1")
-    field(DRVH, "99")
-    field(DRVL, "1")
-}
-
-# Program Loops Readback
-record(longin, "$(P,undefined):PROG_LOOPS_RB") {
-    field(DESC, "Program Loops Readback")
-    field(DTYP, "stream")
-    field(INP,  "@polyscience.proto get_program_loops $(PORT)")
-    field(SCAN, "10 second")
-}
-
-# Current Loop Number Readback
-record(longin, "$(P,undefined):PROG_CURLOOP_RB") {
-    field(DESC, "Current Loop Number")
-    field(DTYP, "stream")
-    field(INP,  "@polyscience.proto get_current_loop $(PORT)")
-    field(SCAN, "5 second")
-}
-
-# Current Step Number Readback
-record(longin, "$(P,undefined):PROG_CURSTEP_RB") {
-    field(DESC, "Current Step Number")
-    field(DTYP, "stream")
-    field(INP,  "@polyscience.proto get_current_step $(PORT)")
-    field(SCAN, "5 second")
-}
-
-# Elapsed Step Time Readback
-record(ai, "$(P,undefined):PROG_ELAPSED_RB") {
-    field(DESC, "Elapsed Step Time")
-    field(DTYP, "stream")
-    field(INP,  "@polyscience.proto get_elapsed_time $(PORT)")
-    field(SCAN, "5 second")
-    field(EGU,  "min")
+    field(EGU,  "°C")
     field(PREC, "2")
 }
 
-# Program Status (0=Stopped, 1=Running, 2=Paused)
-record(mbbi, "$(P,undefined):PROG_STATUS_RB") {
-    field(DESC, "Program Status")
+# High Temperature Alarm Setpoint
+record(ao, "$(P):HIGH_ALARM_SP") {
+    field(DESC, "High Temp Alarm Setpoint")
     field(DTYP, "stream")
-    field(INP,  "@polyscience.proto get_program_status $(PORT)")
+    field(OUT,  "@polyscience.proto setHighAlarm $(PORT)")
+    field(EGU,  "°C")
+    field(PREC, "2")
+    field(FLNK, "$(P):HIGH_ALARM_RB")
+}
+
+# Low Temperature Alarm Readback
+record(ai, "$(P):LOW_ALARM_RB") {
+    field(DESC, "Low Temp Alarm Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto getLowAlarm $(PORT)")
+    field(SCAN, "10 second")
+    field(EGU,  "°C")
+    field(PREC, "2")
+}
+
+# Low Temperature Alarm Setpoint
+record(ao, "$(P):LOW_ALARM_SP") {
+    field(DESC, "Low Temp Alarm Setpoint")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto setLowAlarm $(PORT)")
+    field(EGU,  "°C")
+    field(PREC, "2")
+    field(FLNK, "$(P):LOW_ALARM_RB")
+}
+
+#----------------------------------------------------------------------
+# PUMP CONTROL
+#----------------------------------------------------------------------
+
+# Pump Speed Readback (0-70)
+record(ai, "$(P):PUMP_SPEED_RB") {
+    field(DESC, "Pump Speed Readback")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto getPumpSpeed $(PORT)")
     field(SCAN, "5 second")
+    field(EGU,  "%")
+    field(PREC, "0")
+    field(HOPR, "70")
+    field(LOPR, "0")
+}
+
+# Pump Speed Control (0-70)
+record(ao, "$(P):PUMP_SPEED_SP") {
+    field(DESC, "Pump Speed Control")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto setPumpSpeed $(PORT)")
+    field(EGU,  "%")
+    field(PREC, "0")
+    field(DRVH, "70")
+    field(DRVL, "0")
+    field(HOPR, "70")
+    field(LOPR, "0")
+    field(FLNK, "$(P):PUMP_SPEED_RB")
+}
+
+#----------------------------------------------------------------------
+# REMOTE PROBE SELECTION
+#----------------------------------------------------------------------
+
+# Remote Probe Readback (which temperature sensor is active)
+record(bi, "$(P):REMOTE_PROBE_RB") {
+    field(DESC, "Remote Probe Selection")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto getRemoteProbe $(PORT)")
+    field(SCAN, "10 second")
+    field(ZNAM, "Internal")
+    field(ONAM, "External")
+}
+
+# Remote Probe Control - 0=Internal, 1=External
+record(bo, "$(P):REMOTE_PROBE_SP") {
+    field(DESC, "Remote Probe Selection")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto setRemoteProbe $(PORT)")
+    field(ZNAM, "Internal")
+    field(ONAM, "External")
+    field(FLNK, "$(P):REMOTE_PROBE_RB")
+}
+
+#----------------------------------------------------------------------
+# LOCKOUT CONTROL
+#----------------------------------------------------------------------
+
+# Local Lockout Readback
+record(bi, "$(P):LOCKOUT_STATUS_RB") {
+    field(DESC, "Lockout Status")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto getLockoutStatus $(PORT)")
+    field(SCAN, "5 second")
+    field(ZNAM, "Unlocked")
+    field(ONAM, "Locked")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MINOR")
+}
+
+# Local Lockout Control
+record(bo, "$(P):LOCKOUT_SP") {
+    field(DESC, "Local Lockout Control")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto setLockout $(PORT)")
+    field(ZNAM, "Unlock")
+    field(ONAM, "Lock")
+    field(FLNK, "$(P):LOCKOUT_STATUS_RB")
+}
+
+#----------------------------------------------------------------------
+# ECHO CONTROL
+#----------------------------------------------------------------------
+
+# Echo Control - 0=Off, 1=On
+record(bo, "$(P):ECHO_SP") {
+    field(DESC, "Command Echo Control")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto setEcho $(PORT)")
+    field(ZNAM, "Off")
+    field(ONAM, "On")
+}
+
+#----------------------------------------------------------------------
+# STATUS AND INFORMATION
+#----------------------------------------------------------------------
+
+# Power Status (0 or 1)
+record(bi, "$(P):POWER_STATUS_RB") {
+    field(DESC, "Power Status")
+    field(DTYP, "stream")
+    field(INP,  "@polyscience.proto getPowerStatus $(PORT)")
+    field(SCAN, "5 second")
+    field(ZNAM, "Reset")
+    field(ONAM, "Set")
+}
+
+# Power Status Control
+record(bo, "$(P):POWER_STATUS_SP") {
+    field(DESC, "Power Status Control")
+    field(DTYP, "stream")
+    field(OUT,  "@polyscience.proto setPowerStatus $(PORT)")
+    field(ZNAM, "Reset")
+    field(ONAM, "Set")
+    field(FLNK, "$(P):POWER_STATUS_RB")
+}
+
+#----------------------------------------------------------------------
+# STATUS_RB - Combined status register (for compatibility with chillerSmc)
+# Bits: B0=RUN, B1=ALARM, B2=WARNING
+#----------------------------------------------------------------------
+
+record(calc, "$(P):STATUS_RB") {
+    field(DESC, "Combined Status Register")
+    field(SCAN, "1 second")
+    field(INPA, "$(P):OPERATION_STATUS_RB")
+    field(INPB, "$(P):ALARM_STATUS_RB")
+    field(CALC, "A + (B<<1)")
+}
+
+# Individual status bits (for compatibility with chillerSmc OPI)
+record(bi, "$(P):STATUS:RUN") {
+    field(DESC, "Run Status")
+    field(INP,  "$(P):STATUS_RB.B0 CP")
+    field(SCAN, "Passive")
+    field(ZNAM, "Stop")
+    field(ONAM, "Run")
+    field(ZSV,  "MINOR")
+    field(OSV,  "NO_ALARM")
+}
+
+record(bi, "$(P):STATUS:ALARM") {
+    field(DESC, "Alarm Status")
+    field(INP,  "$(P):STATUS_RB.B1 CP")
+    field(SCAN, "Passive")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MAJOR")
+}
+
+record(bi, "$(P):STATUS:WARN") {
+    field(DESC, "Warning Status")
+    field(INP,  "$(P):STATUS_RB.B2 CP")
+    field(SCAN, "Passive")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MINOR")
+}
+
+#----------------------------------------------------------------------
+# STATE_RB - Decoded state for OPI display
+# State: 0=OFF, 1=RUN, 2=WARNING, 3=ALARM
+#----------------------------------------------------------------------
+
+record(calcout, "$(P):calcstate") {
+    field(DESC, "State 0=OFF,1=RUN,2=WARNING,3=ALARM")
+    field(SCAN, "Passive")
+    field(INPA, "$(P):STATUS_RB.B0")  # RUN
+    field(INPB, "$(P):STATUS_RB.B1")  # ALARM
+    field(INPC, "0")                   # WARNING (not available on Polyscience)
+    field(CALC, "B=1?3:(C=1?2:(A=1?1:0))")
+    field(OUT,  "$(P):STATE_RB PP")
+}
+
+record(mbbi, "$(P):STATE_RB") {
+    field(DESC, "Decoded State")
     field(ZRVL, "0")
     field(ONVL, "1")
     field(TWVL, "2")
-    field(ZRST, "Stopped")
-    field(ONST, "Running")
-    field(TWST, "Paused")
+    field(THVL, "3")
+    field(ZRST, "OFF")
+    field(ONST, "RUN")
+    field(TWST, "WARNING")
+    field(THST, "ALARM")
+    field(ZRSV, "MINOR")
+    field(ONSV, "NO_ALARM")
+    field(TWSV, "MINOR")
+    field(THSV, "MAJOR")
 }
 
-# Program Run/Pause Control
-record(mbbo, "$(P,undefined):PROG_RUN_SP") {
-    field(DESC, "Program Run/Pause")
-    field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_run_status $(PORT)")
+#----------------------------------------------------------------------
+# OUTPUT_RATIO_RB - Simulated for compatibility (not available on Polyscience)
+#----------------------------------------------------------------------
+
+record(calc, "$(P):OUTPUT_RATIO_RB") {
+    field(DESC, "Output Ratio (simulated)")
+    field(SCAN, "5 second")
+    field(INPA, "$(P):INT_TEMP_RB")
+    field(INPB, "$(P):TEMP_SETPT_RB")
+    field(EGU,  "%")
+    field(PREC, "0")
+    field(CALC, "A<B?100:0")
+}
+
+#----------------------------------------------------------------------
+# CONTROL MODE READBACK (for compatibility with chillerSmc)
+#----------------------------------------------------------------------
+
+record(mbbi, "$(P):CTR_RB") {
+    field(DESC, "Control Mode Readback")
+    field(INP,  "$(P):OPERATION_STATUS_RB CP")
+    field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
-    field(ZRST, "Pause")
+    field(ZRST, "Stop")
     field(ONST, "Run")
 }
 
-# Program Stop Command
-record(bo, "$(P,undefined):PROG_STOP") {
-    field(DESC, "Program Stop Command")
-    field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_program_stop $(PORT)")
-    field(HIGH, "0.1")
-    field(ZNAM, "Idle")
-    field(ONAM, "Stop")
+#----------------------------------------------------------------------
+# CONNECTION STATUS
+#----------------------------------------------------------------------
+
+# Connection status based on successful reads
+record(calc, "$(P):CONN_STATUS") {
+    field(DESC, "Connection Status")
+    field(SCAN, "5 second")
+    field(INPA, "$(P):INT_TEMP_RB.STAT")
+    field(CALC, "A=0?1:0")
+    field(FLNK, "$(P):CONN_STATUS_BI")
 }
 
-# Program Skip Period Command
-record(bo, "$(P,undefined):PROG_SKIP") {
-    field(DESC, "Skip Current Period")
-    field(DTYP, "stream")
-    field(OUT,  "@polyscience.proto set_skip_period $(PORT)")
-    field(HIGH, "0.1")
-    field(ZNAM, "Idle")
-    field(ONAM, "Skip")
+record(bi, "$(P):CONN_STATUS_BI") {
+    field(DESC, "Connection Status")
+    field(INP,  "$(P):CONN_STATUS")
+    field(ZNAM, "Disconnected")
+    field(ONAM, "Connected")
+    field(ZSV,  "MAJOR")
+    field(OSV,  "NO_ALARM")
 }
 
-#======================================================================
-# DEVICE IDENTIFICATION
-#======================================================================
+#----------------------------------------------------------------------
+# HEARTBEAT - Periodic communication check
+#----------------------------------------------------------------------
 
-record(stringin, "$(P,undefined):ID_RB") {
-    field(DESC, "Device Model/ID")
-    field(DTYP, "stream")
-    field(INP,  "@polyscience.proto read_id $(PORT)")
-    field(SCAN, "Passive")
-    field(PINI, "YES")
+record(calcout, "$(P):HEARTBEAT") {
+    field(DESC, "Communication Heartbeat")
+    field(SCAN, "10 second")
+    field(INPA, "$(P):HEARTBEAT")
+    field(CALC, "(A+1)%100")
+    field(OUT,  "$(P):HEARTBEAT_RB PP")
+}
+
+record(longin, "$(P):HEARTBEAT_RB") {
+    field(DESC, "Heartbeat Counter")
 }

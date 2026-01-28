@@ -1,1 +1,2 @@
-include $(CONFIG)/RULES.ioc
+#RULES.ioc
+include $(EPICS_BASE)/configure/RULES.ioc

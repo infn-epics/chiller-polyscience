@@ -1,0 +1,172 @@
+#
+# Project       : Polyscience Chiller - Unicool Interface
+# Description   : Unicool-compatible interface for Polyscience Chiller
+#                 Allows reuse of chillerSmc OPIs
+#
+# Author        : ELI-NP
+# Created       : 2026-01-28
+#
+# Usage: Load this DB along with polyscience.db
+#        dbLoadRecords("db/polyscience.db", "P=xxx,PORT=yyy")
+#        dbLoadRecords("db/unicool-poly.db", "P=xxx")
+#
+
+#----------------------------------------------------------------------
+# ALIASES FOR UNICOOL COMPATIBILITY
+# These create standard names that match the SMC chiller interface
+#----------------------------------------------------------------------
+
+alias("$(P):INT_TEMP_RB","$(P):TEMP_RB")
+alias("$(P):TEMP_SETPT_SP","$(P):TEMP_SP")
+alias("$(P):CTR_SP","$(P):STATE_SP")
+
+#----------------------------------------------------------------------
+# STATE CALCULATION
+# State: 0=OFF, 1=RUN, 2=WARNING, 3=ALARM
+# This calculates the overall chiller state from status bits
+#----------------------------------------------------------------------
+
+record(calcout, "$(P):calcstate") {
+    field(DESC, "State 0=OFF,1=RUN,2=WARNING,3=ALARM")
+    field(SCAN, "1 second")
+    field(INPA, "$(P):STATUS_RB.B0")  # RUN bit
+    field(INPB, "$(P):STATUS_RB.B1")  # ALARM bit
+    field(INPC, "$(P):STATUS_RB.B2")  # WARNING bit
+    field(CALC, "B=1?3:(C=1?2:(A=1?1:0))")
+    field(OUT,  "$(P):STATE_RB PP")
+    field(FLNK, "$(P):STATE_RB")
+}
+
+record(mbbi, "$(P):STATE_RB") {
+    field(DESC, "Decoded:0=OFF,1=RUN,2=WARNING,3=ALARM")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "OFF")
+    field(ONST, "RUN")
+    field(TWST, "WARNING")
+    field(THST, "ALARM")
+    field(ZRSV, "MINOR")
+    field(ONSV, "NO_ALARM")
+    field(TWSV, "MINOR")
+    field(THSV, "MAJOR")
+}
+
+#----------------------------------------------------------------------
+# STATUS REGISTER
+# Combined status register for compatibility with chillerSmc
+# Bits: B0=RUN, B1=ALARM, B2=WARNING
+#----------------------------------------------------------------------
+
+record(calc, "$(P):STATUS_RB") {
+    field(DESC, "Combined Status Register")
+    field(SCAN, "1 second")
+    field(INPA, "$(P):OPERATION_STATUS_RB CP")
+    field(INPB, "$(P):ALARM_STATUS_RB CP")
+    field(CALC, "A + (B<<1)")
+}
+
+#----------------------------------------------------------------------
+# INDIVIDUAL STATUS BITS
+# For OPI LED indicators
+#----------------------------------------------------------------------
+
+record(bi, "$(P):STATUS:RUN") {
+    field(DESC, "Run Status")
+    field(INP,  "$(P):STATUS_RB.B0 CP")
+    field(SCAN, "Passive")
+    field(ZNAM, "Stop")
+    field(ONAM, "Run")
+    field(ZSV,  "MINOR")
+    field(OSV,  "NO_ALARM")
+}
+
+record(bi, "$(P):STATUS:ALARM") {
+    field(DESC, "Alarm Status")
+    field(INP,  "$(P):STATUS_RB.B1 CP")
+    field(SCAN, "Passive")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MAJOR")
+}
+
+record(bi, "$(P):STATUS:WARN") {
+    field(DESC, "Warning Status")
+    field(INP,  "$(P):STATUS_RB.B2 CP")
+    field(SCAN, "Passive")
+    field(ZNAM, "Inactive")
+    field(ONAM, "Active")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MINOR")
+}
+
+#----------------------------------------------------------------------
+# CONTROL MODE READBACK
+# For compatibility with chillerSmc OPI
+#----------------------------------------------------------------------
+
+record(mbbi, "$(P):CTR_RB") {
+    field(DESC, "Control Mode Readback")
+    field(INP,  "$(P):OPERATION_STATUS_RB CP")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(ZRST, "Stop")
+    field(ONST, "Run")
+}
+
+#----------------------------------------------------------------------
+# OUTPUT RATIO (Simulated)
+# Polyscience doesn't report actual output ratio, so we simulate it
+#----------------------------------------------------------------------
+
+record(calc, "$(P):OUTPUT_RATIO_RB") {
+    field(DESC, "Output Ratio (simulated)")
+    field(SCAN, "5 second")
+    field(INPA, "$(P):INT_TEMP_RB CP")
+    field(INPB, "$(P):TEMP_SETPT_RB CP")
+    field(EGU,  "%")
+    field(PREC, "0")
+    field(CALC, "A<B?100:0")
+}
+
+#----------------------------------------------------------------------
+# CONNECTION STATUS
+# Based on successful communication with the device
+#----------------------------------------------------------------------
+
+record(calc, "$(P):CONN_STATUS") {
+    field(DESC, "Connection Status")
+    field(SCAN, "5 second")
+    field(INPA, "$(P):INT_TEMP_RB.STAT")
+    field(CALC, "A=0?1:0")
+    field(FLNK, "$(P):CONN_STATUS_BI")
+}
+
+record(bi, "$(P):CONN_STATUS_BI") {
+    field(DESC, "Connection Status")
+    field(INP,  "$(P):CONN_STATUS")
+    field(ZNAM, "Disconnected")
+    field(ONAM, "Connected")
+    field(ZSV,  "MAJOR")
+    field(OSV,  "NO_ALARM")
+}
+
+#----------------------------------------------------------------------
+# HEARTBEAT
+# Periodic communication check counter
+#----------------------------------------------------------------------
+
+record(calcout, "$(P):HEARTBEAT") {
+    field(DESC, "Communication Heartbeat")
+    field(SCAN, "10 second")
+    field(INPA, "$(P):HEARTBEAT")
+    field(CALC, "(A+1)%100")
+    field(OUT,  "$(P):HEARTBEAT_RB PP")
+}
+
+record(longin, "$(P):HEARTBEAT_RB") {
+    field(DESC, "Heartbeat Counter")
+}

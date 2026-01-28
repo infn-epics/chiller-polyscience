@@ -7,11 +7,6 @@
 # The EPICS build process does not check dependencies against
 # any files from outside the application, so it is safest to
 # rebuild it completely if any modules it depends on change.
-#
-# Host- or target-specific settings can be given in files named
-#  RELEASE.$(EPICS_HOST_ARCH).Common
-#  RELEASE.Common.$(T_A)
-#  RELEASE.$(EPICS_HOST_ARCH).$(T_A)
 
 # Variables and paths to dependent modules:
 SUPPORT=/epics/support
@@ -20,6 +15,10 @@ STREAMDEVICE=$(SUPPORT)/StreamDevice
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
 EPICS_BASE=/epics/epics-base/
+
+# Set RULES here if you want to use build rules from somewhere
+# other than EPICS_BASE:
+#RULES = $(MODULES)/build-rules
 
 # These lines allow developers to override these RELEASE settings
 # without having to modify this file directly.

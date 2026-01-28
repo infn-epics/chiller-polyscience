@@ -1,1 +1,6 @@
-include $(CONFIG)/RULES
+# RULES
+
+include $(EPICS_BASE)/configure/RULES
+
+# Library should be rebuilt because LIBOBJS may have changed.
+$(LIBNAME): ../Makefile

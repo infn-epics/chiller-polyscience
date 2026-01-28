@@ -7,7 +7,32 @@ received from the Controller before another command can be sent. All responses a
 with a single [CR].
 
 
-PROGRAMMABLE-CONTROLLER-ONLY COMMANDS
+GENERAL COMMANDS (Digital & Programmable Controllers)
+Command Name	Command String	Parameters	Return Message
+Set Command Echo	SEi[CR]	i=1 (Echo ON), i=0 (Echo OFF)	![CR]
+Set Local Lockout	SAi[CR]	i=1 (Locked), i=0 (Unlocked)	![CR]
+Set Setpoint	SSxxx.xx[CR]	xxx.xx = temperature value	![CR]
+Set On/Off	SOi[CR]	i=1 (On), i=0 (Off)	![CR]
+Set Power Status	SWi[CR]	i=1 (Set), i=0 (Reset)	![CR]
+Set Pump Speed	SMx[CR]	x = 0 to 70	![CR]
+Set High Alarm	SHxxx.xx[CR]	xxx.xx = temperature	![CR]
+Set Low Alarm	SLxxx.xx[CR]	xxx.xx = temperature	![CR]
+Set Remote Probe	Sri[CR]	i=0 (Internal), i=1 (External)	![CR]
+Get Setpoint Temperature	RS[CR]	None	![CR]
+Get Internal Temperature	RT[CR]	None	![CR]
+Get External Temperature	RR[CR]	None	![CR]
+Get Local Lockout Status	RA[CR]	None	0[CR] or 1[CR]
+Get Power Status	RW[CR]	None	x[CR] (0 or 1)
+Get Pump Speed	RM[CR]	None	x[CR] (0–70)
+Get Temperature Units	RU[CR]	None	C[CR] or F[CR]
+Get High Alarm	RH[CR]	None	xxx.xx[CR]
+Get Low Alarm	RL[CR]	None	xxx.xx[CR]
+Get Alarm Status	RF[CR]	None	0[CR] (No alarm) or 1[CR] (Alarm)
+Get Operation Status	RO[CR]	None	1[CR] (Running) or 0[CR] (Standby)
+Get Firmware Revision	RB[CR]	None	00XXXXXXXX[CR]
+
+🔄 PROGRAMMABLE-CONTROLLER-ONLY COMMANDS
+
 Command Name	Command String	Parameters	Return Message
 Set Program Number	SVx[CR]	x = program number (1–10)	![CR]
 Set Program Steps	Ssxx[CR]	xx = number of steps (1–50)	![CR]

@@ -1,4 +1,7 @@
-TOP=..
+TOP = ..
 include $(TOP)/configure/CONFIG
-DIRS += src Db
+
+DIRS := src
+DIRS += Db
+
 include $(TOP)/configure/RULES_DIRS

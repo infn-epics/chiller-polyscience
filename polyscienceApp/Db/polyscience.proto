@@ -1,0 +1,169 @@
+# Polyscience Chiller StreamDevice Protocol File
+# Communication via RS-232 serial port
+# Commands must be followed by CR (carriage return), no LF (line feed)
+# All responses end with single CR
+# Successful command returns "!" followed by data or just "!"
+# Error returns "?"
+
+ReplyTimeout = 2000;
+ReadTimeout = 2000;
+WriteTimeout = 2000;
+Terminator = CR;
+ExtraInput = Ignore;
+
+#----------------------------------------------------------------------
+# TEMPERATURE READINGS
+#----------------------------------------------------------------------
+
+# Get Internal Temperature - returns temperature value
+getInternalTemp {
+    out "RT";
+    in "%f";
+}
+
+# Get External Temperature - returns temperature value
+getExternalTemp {
+    out "RR";
+    in "%f";
+}
+
+# Get Setpoint Temperature
+getSetpoint {
+    out "RS";
+    in "%f";
+}
+
+#----------------------------------------------------------------------
+# TEMPERATURE SETPOINT
+#----------------------------------------------------------------------
+
+# Set Temperature Setpoint
+# Format: SSxxx.xx where xxx.xx is temperature
+setSetpoint {
+    out "SS%.2f";
+    in "!";
+}
+
+#----------------------------------------------------------------------
+# STATUS AND CONTROL
+#----------------------------------------------------------------------
+
+# Get Operation Status - 1=Running, 0=Standby/Off
+getOperationStatus {
+    out "RO";
+    in "%d";
+}
+
+# Set On/Off - 1=On, 0=Off
+setOnOff {
+    out "SO%d";
+    in "!";
+}
+
+# Get Local Lockout Status - 0=Unlocked, 1=Locked
+getLockoutStatus {
+    out "RA";
+    in "%d";
+}
+
+# Set Local Lockout - 1=Locked, 0=Unlocked
+setLockout {
+    out "SA%d";
+    in "!";
+}
+
+#----------------------------------------------------------------------
+# ALARM SETTINGS
+#----------------------------------------------------------------------
+
+# Get High Temperature Alarm
+getHighAlarm {
+    out "RH";
+    in "%f";
+}
+
+# Set High Temperature Alarm
+setHighAlarm {
+    out "SH%.2f";
+    in "!";
+}
+
+# Get Low Temperature Alarm
+getLowAlarm {
+    out "RL";
+    in "%f";
+}
+
+# Set Low Temperature Alarm
+setLowAlarm {
+    out "SL%.2f";
+    in "!";
+}
+
+# Get Alarm Status - 0=No alarm, 1=Alarm active
+getAlarmStatus {
+    out "RF";
+    in "%d";
+}
+
+#----------------------------------------------------------------------
+# PUMP AND SETTINGS
+#----------------------------------------------------------------------
+
+# Get Pump Speed - returns value 0-70
+getPumpSpeed {
+    out "RM";
+    in "%d";
+}
+
+# Set Pump Speed - value 0-70
+setPumpSpeed {
+    out "SM%d";
+    in "!";
+}
+
+# Get Temperature Units - C or F
+getTempUnits {
+    out "RU";
+    in "%c";
+}
+
+# Get Power Status - 0 or 1
+getPowerStatus {
+    out "RW";
+    in "%d";
+}
+
+# Set Power Status - 1=Set, 0=Reset
+setPowerStatus {
+    out "SW%d";
+    in "!";
+}
+
+# Get Firmware Revision
+getFirmwareRevision {
+    out "RB";
+    in "%s";
+}
+
+#----------------------------------------------------------------------
+# ECHO AND REMOTE PROBE
+#----------------------------------------------------------------------
+
+# Set Command Echo - 1=Echo ON, 0=Echo OFF
+setEcho {
+    out "SE%d";
+    in "!";
+}
+
+# Get Remote Probe Setting
+getRemoteProbe {
+    out "RK";
+    in "%d";
+}
+
+# Set Remote Probe - 0=Internal, 1=External
+setRemoteProbe {
+    out "Sr%d";
+    in "!";
+}
